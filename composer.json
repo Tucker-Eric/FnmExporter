@@ -1,0 +1,27 @@
+{
+    "name": "interestsmart/fnmexporter",
+    "description": "An class to export to FannieMae (.fnm) format",
+    "type": "library",
+    "keywords": ["fnm","FannieMae","mortgage"],
+    "homepage": "https://github.com/InterestSmart/FnmExporter",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Eric Tucker",
+            "email": "tucker.ericm@gmail.com"
+        }
+    ],
+    "require": {},
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/InterestSmart/FnmExporter"
+        }
+    ],
+    "autoload": {
+        "psr-4": {"InterestSmart\\FnmExporter\\": "src/"}
+    },
+    "replace": {
+        "interestsmart/fnmexporter": "self.version"
+    }
+}
