@@ -23,5 +23,8 @@
     },
     "replace": {
         "interestsmart/fnmexporter": "self.version"
+    },
+    "scripts": {
+        "post-update-cmd": "php bin/publish"
     }
 }
