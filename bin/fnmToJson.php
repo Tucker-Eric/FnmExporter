@@ -31,14 +31,17 @@ class fnmToJson
 
     public function __construct()
     {
+        $this->copyMapperFile();
         $this->csv = fopen($this->file_to_read, 'r');
         $this->readData()
             ->toJson();
-        $this->copyMapperFile();
     }
 
     public function copyMapperFile()
     {
+        if(!file_exists(__DIR__.'/../config'))
+            mkdir(__DIR__.'/../config');
+
         if (!file_exists(__DIR__ . '/../config/mapper.php'))
         {
             if (!copy(__DIR__ . '/mapper.example.php', __DIR__ . '/../config/mapper.php'))

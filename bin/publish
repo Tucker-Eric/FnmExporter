@@ -2,5 +2,5 @@
 <?php
 
 require __DIR__.'/fnmToJson.php';
-mkdir(__DIR__.'/../config');
+
 new fnmToJson();
