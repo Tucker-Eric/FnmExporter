@@ -3,4 +3,4 @@
 
 require __DIR__.'/fnmToJson.php';
 
-new fnmToJson();
+new fnmToJson($argv[1]);

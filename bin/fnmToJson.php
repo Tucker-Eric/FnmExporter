@@ -28,23 +28,34 @@ class fnmToJson
     private $formatted_headers = [];
     private $csv;
     private $all_fields = [];
+    private $destinationDir;
 
-    public function __construct()
+    public function __construct($destinationDir = null)
     {
-        $this->copyMapperFile();
+        $this->destinationDir = is_null($destinationDir) ? __DIR__ . '/../config' : $destinationDir;
+        $this->createConfigJson()->copyMapperFile();
         $this->csv = fopen($this->file_to_read, 'r');
         $this->readData()
             ->toJson();
     }
 
+    private function createConfigJson()
+    {
+        $_fp = fopen(__DIR__ . '/../config.local.json', 'w+');
+        fwrite($_fp, json_encode(['dir' => getcwd().'/'.$this->destinationDir]));
+        fclose($_fp);
+
+        return $this;
+    }
+
     public function copyMapperFile()
     {
-        if(!file_exists(__DIR__.'/../config'))
-            mkdir(__DIR__.'/../config');
+        if (!file_exists($this->destinationDir))
+            mkdir($this->destinationDir);
 
-        if (!file_exists(__DIR__ . '/../config/mapper.php'))
+        if (!file_exists($this->destinationDir . '/mapper.php'))
         {
-            if (!copy(__DIR__ . '/mapper.example.php', __DIR__ . '/../config/mapper.php'))
+            if (!copy(__DIR__ . '/mapper.example.php', $this->destinationDir . '/mapper.php'))
             {
                 echo "Failed to copy mapper file";
 
@@ -139,7 +150,7 @@ class fnmToJson
 
     protected function toJson()
     {
-        $_fp = fopen(__DIR__ . '/../config/fnm.json', 'w+');
+        $_fp = fopen($this->destinationDir.'/fnm.json', 'w+');
         fwrite($_fp, json_encode($this->all_fields, JSON_PRETTY_PRINT));
         fclose($_fp);
 

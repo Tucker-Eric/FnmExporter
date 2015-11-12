@@ -45,17 +45,30 @@ class Formatter
 
     public function __construct($input, $fileName = 'Export')
     {
+        $this->loadConfig();
         // Grab Input
         $this->_input = $input;
+
         // Set the file name
         $this->file_name = $fileName . '.fnm';
-        // Load the field config
-        $this->_fields = json_decode(file_get_contents(__DIR__ . '/../config/fnm.json'));
-        // Load our local config to map the vals
-        $this->_mapper = require_once __DIR__ . '/../config/mapper.php';
+
         // Start the buffer and lets goooooo!
         ob_start();
         $this->_file = fopen('php://output', 'w');
+    }
+
+    /**
+     * Load Config files
+     */
+    private function loadConfig()
+    {
+        $config = json_decode(file_get_contents(__DIR__ . '/../config.local.json'));
+        // Load the field config
+        $this->_fields = json_decode(file_get_contents($config->dir.'/fnm.json'));
+
+        // Load our local config to map the vals
+        $this->_mapper = require_once $config->dir . '/mapper.php';
+
     }
 
     /**
