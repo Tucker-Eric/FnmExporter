@@ -101,7 +101,7 @@ class Formatter
      */
     private function mappedField($part)
     {
-        return isset($this->_mapper['mapped'][$part->field_id]);
+        return isset($this->_mapper['mapped'][$part->field_id]) && substr($part->field_id, -3,3) != '010';
     }
 
     /**
@@ -166,9 +166,17 @@ class Formatter
             if ($partsToWrite[$part->field_id] == 'mapped' && is_array($this->_mapper['mapped'][$part->field_id]))
                 $repeatRow[] = count($this->_mapper['mapped'][$part->field_id]);
 
+            // If there is a repeat in the first position it means we can repeat the row the amount of times the next method evaluates to or number given
+            if(substr($part->field_id,-3,3) == '010' && strpos($this->_mapper['mapped'][$part->field_id], 'repeat') !== false)
+            {                
+                $repeatExp = explode('|', $this->_mapper['mapped'][$part->field_id]);
+                
+                $repeatRow[] = $repeatExp[1] == 'computed' ? $this->handleComputeAndStore($repeatExp[2]) : $repeatExp[1];                
+            }
+
             // If it is already true we dont need to check
             // All we need is 1 field to not be default to write a row so we have to check
-            if (!$writing && $partsToWrite[$part->field_id] != 'default')
+            if (!$writing && ($partsToWrite[$part->field_id] != 'default' || max($repeatRow) > 1) )
             {
                 $writing = true;
             }
@@ -201,7 +209,7 @@ class Formatter
                 // Default is to not write this row so we dont write blank rows for the rows that allow multi rows
                 $writeRow = false;
                 foreach ($parts as $part)
-                {
+                {                    
                     // Preemptive error avoidance just to make sure we force an int
                     $part->field_length = (integer)$part->field_length;
                     // Call appropriate write type for this part of the row
@@ -324,24 +332,30 @@ class Formatter
      * @return mixed
      * @throws MethodNotSetException
      */
-    private function handleComputeAndStore($methodAndArgs)
-    {
+    private function handleComputeAndStore($methodAndArgs, $counter = 0)
+    {        
         // If we have already computed this return it
-        if (isset($this->_computed[$methodAndArgs]))
-            return $this->_computed[$methodAndArgs];
+        if (isset($this->_computed[$methodAndArgs.$counter]))
+            return $this->_computed[$methodAndArgs.$counter];
 
         // Pull prameters out of string
         $params = explode("::", $methodAndArgs);
+
         // Pull out the
         $method = array_shift($params);
-
+        // Switch the counter input for the value of the counter
+        
+            $params = array_map(function($param) use ($counter) {
+                return $param == 'counter' ? $counter : $param;
+            }, $params);
+            
         // Check to make sure the method exists
         if (!method_exists($this, $method))
             throw new MethodNotSetException('Computed Method ' . $method . ' doesnt\'t exist!');
 
-        $this->_computed[$methodAndArgs] = call_user_func_array([$this, $method], array_map([$this, 'inputReturnSelf'], $params));
-
-        return $this->_computed[$methodAndArgs];
+        $this->_computed[$methodAndArgs.$counter] = call_user_func_array([$this, $method], array_map([$this, 'inputReturnSelf'], $params));
+        
+        return $this->_computed[$methodAndArgs.$counter];
     }
 
     /**
@@ -364,7 +378,7 @@ class Formatter
         if ($concats[0] == 'computed')
         {
             // If its a computed field then we will compute
-            $str = $this->handleComputeAndStore($concats[1]);
+            $str = $this->handleComputeAndStore($concats[1], $mapperIndex);
 
         } elseif ($concats[0] == 'onlyif')
         {
@@ -377,7 +391,7 @@ class Formatter
                     switch ($concats[2])
                     {
                         case 'computed':
-                            $str = $this->handleComputeAndStore($concats[3]);
+                            $str = $this->handleComputeAndStore($concats[3], $mapperIndex);
                             break;
                         case 'set':
                             $str = $concats[3];
