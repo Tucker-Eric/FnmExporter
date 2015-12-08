@@ -167,7 +167,7 @@ class Formatter
                 $repeatRow[] = count($this->_mapper['mapped'][$part->field_id]);
 
             // If there is a repeat in the first position it means we can repeat the row the amount of times the next method evaluates to or number given
-            if(substr($part->field_id,-3,3) == '010' && strpos($this->_mapper['mapped'][$part->field_id], 'repeat') !== false)
+            if(substr($part->field_id,-3,3) == '010' && isset($this->_mapper['mapped'][$part->field_id]) && strpos($this->_mapper['mapped'][$part->field_id], 'repeat') !== false)
             {                
                 $repeatExp = explode('|', $this->_mapper['mapped'][$part->field_id]);
                 
