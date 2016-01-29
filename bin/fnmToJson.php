@@ -2,7 +2,7 @@
 
 class fnmToJson
 {
-    protected $file_to_read = __DIR__ . '/fnm_fields.csv';
+    protected $file_to_read = '/fnm_fields.csv';
 
     protected $avalaibleHeaders = [
         'field_id'          => 'Field ID',
@@ -34,7 +34,7 @@ class fnmToJson
     {
         $this->destinationDir = is_null($destinationDir) ? __DIR__ . '/../config' : $destinationDir;
         $this->createConfigJson()->copyMapperFile();
-        $this->csv = fopen($this->file_to_read, 'r');
+        $this->csv = fopen(__DIR__ . $this->file_to_read, 'r');
         $this->readData()
             ->toJson();
     }
